@@ -1,0 +1,651 @@
+#include "main.h"
+#include <string.h>
+#include <stdio.h>
+#include "stm32f1xx.h"
+#include "lcd_i2c.h"
+
+I2C_HandleTypeDef hi2c1;
+
+TIM_HandleTypeDef htim1;
+
+I2C_LCD_HandleTypeDef lcd;
+
+// Define pulse values for servo angles
+#define SERVO_0_DEGREE    1000    // 0.5 ms pulse
+#define SERVO_90_DEGREE   1500   // 1.5 ms pulse
+#define SERVO_180_DEGREE  2500   // 2.5 ms pulse
+
+#define R1_PORT GPIOA
+#define R1_Pin GPIO_PIN_7
+
+#define R2_PORT GPIOA
+#define R2_Pin GPIO_PIN_6
+
+#define R3_PORT GPIOA
+#define R3_Pin GPIO_PIN_5
+
+#define R4_PORT GPIOA
+#define R4_Pin GPIO_PIN_4
+
+#define C1_PORT GPIOA
+#define C1_Pin GPIO_PIN_3
+
+#define C2_PORT GPIOA
+#define C2_Pin GPIO_PIN_2
+
+#define C3_PORT GPIOA
+#define C3_Pin GPIO_PIN_1
+
+#define C4_PORT GPIOA
+#define C4_Pin GPIO_PIN_0
+
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_I2C1_Init(void);
+static void MX_TIM1_Init(void);
+void Keys_Detect(void);
+
+#define PASSWORD_LENGTH 4
+char correctPassword[] = "1234";
+char enteredPassword[PASSWORD_LENGTH + 1] = "";
+uint8_t passwordIndex = 0;
+
+void moveServo(uint16_t pulseWidth) {
+		    // Move Servo to 90 degree
+	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pulseWidth);
+	HAL_Delay(3000);
+	HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
+
+}
+
+void ringBuzzer(void)
+{
+  for (int i = 0; i < 3; i++)  // Ring 3 times
+  {
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_11, GPIO_PIN_SET); // Buzzer ON
+    HAL_Delay(1000);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_11, GPIO_PIN_RESET); // Buzzer OFF
+    HAL_Delay(1000);
+  }
+}
+
+int main(void)
+{
+    // Initialize
+    HAL_Init();
+    SystemClock_Config();
+    MX_GPIO_Init();
+    MX_I2C1_Init();
+    MX_TIM1_Init();
+
+//    /* USER CODE BEGIN 2 */
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, 1);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, 1);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, 1);
+//    /* USER CODE END 2 */
+
+    // Start Servo PWM
+    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+    HAL_Delay(3000);
+    moveServo(SERVO_0_DEGREE);  // 1 ms pulse width for 0 degrees
+    HAL_Delay(3000);
+    HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
+
+    HAL_Delay(3000);
+
+    lcd.hi2c = &hi2c1;
+    lcd.address = 0x27 << 1;
+
+    HAL_Delay(1000);
+    lcd_init(&lcd);
+    lcd_gotoxy(&lcd, 0, 0); // Go to first row, first column
+    HAL_Delay(1000);
+    lcd_puts(&lcd, "Enter Password..."); // Print message
+    HAL_Delay(3000);
+
+  while (1)
+  {
+	  HAL_Delay(3000);
+	  Keys_Detect();
+	  HAL_Delay(100);
+//	  lcd_gotoxy(&lcd, 0, 1);
+//	  lcd_send_cmd(&lcd, 0x0F);
+//	  HAL_Delay(3000);
+//	  if (keyPressed != 0) {
+//		          lcd_putchar(&lcd, keyPressed);  // Print the pressed key on LCD
+//		          enteredPassword[passwordIndex++] = keyPressed;  // Save key
+//		          enteredPassword[passwordIndex] = '\0';          // Null-terminate
+//
+//		          lcd_gotoxy(&lcd, 0, 1);
+//		          lcd_putchar(&lcd, keyPressed);
+//
+//		          keyPressed = 0;  // Reset keyPressed after processing
+//
+////		  char key = read_keypad();
+////		  	      if (key && passwordIndex < PASSWORD_LENGTH) {
+////		  	        enteredPassword[passwordIndex++] = key;
+////		  	        enteredPassword[passwordIndex] = '\0';
+//		          if (passwordIndex == PASSWORD_LENGTH) {
+//		          		  	        HAL_Delay(500);
+//		          		  	        if (strcmp(enteredPassword, correctPassword) == 0) {
+//		          		  	          lcd_clear(&lcd);
+//		          		  	          lcd_gotoxy(&lcd, 0, 0);
+//		          		  	          lcd_puts(&lcd, "Access Granted");
+//		          		  	          HAL_GPIO_WritePin(GPIOB, GPIO_PIN_11, GPIO_PIN_SET); // Buzzer ON
+//		          		  	          HAL_Delay(200);
+//		          		  	          HAL_GPIO_WritePin(GPIOB, GPIO_PIN_11, GPIO_PIN_RESET); // Buzzer OFF
+//		          		  	          moveServo(SERVO_90_DEGREE);  // Move to 90 degrees (1.5 ms pulse)
+//		          		  	          HAL_Delay(3000);  // Wait for 3 seconds at 90 degrees
+//		          		  	          moveServo(SERVO_0_DEGREE);  // Move back to 0 degrees (1 ms pulse)
+//		          		  	        } else {
+//		          		  	          lcd_clear(&lcd);
+//		          		  	          lcd_gotoxy(&lcd, 0, 0);
+//		          		  	          lcd_puts(&lcd, "Wrong Password");
+//		          		  	          ringBuzzer();
+//		          		  	          HAL_GPIO_WritePin(GPIOB, GPIO_PIN_11, GPIO_PIN_RESET); // Buzzer OFF
+//		          		  	        }
+//		          		  	        HAL_Delay(2000);
+//		          		  	        lcd_clear(&lcd);
+//		          		  	        lcd_gotoxy(&lcd, 0, 0);
+//		          		  	        lcd_puts(&lcd, "Enter Password:");
+//		          		  	        passwordIndex = 0;
+//		          		  	        memset(enteredPassword, 0, sizeof(enteredPassword));
+//		          }
+//
+//	  }
+
+
+  }
+}
+
+void Keys_Detect(void)
+{
+	HAL_GPIO_WritePin(GPIOA, R1_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOA, R2_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, R3_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, R4_Pin, GPIO_PIN_RESET);
+
+	if(HAL_GPIO_ReadPin(GPIOA, C1_Pin) == GPIO_PIN_SET)
+	{
+	    /* 1 */
+	    lcd_send_cmd(&lcd, 0x01);               // Clear the display
+	    lcd_send_cmd(&lcd, 0xC0);               // Move the cursor to second line
+	    lcd_puts(&lcd, (char *)"You Pressed Key 1");
+	    while (HAL_GPIO_ReadPin(GPIOA, C1_Pin));
+	}
+
+	if(HAL_GPIO_ReadPin(GPIOA, C2_Pin) == GPIO_PIN_SET)
+	{
+	    /* 2 */
+	    lcd_send_cmd(&lcd, 0x01);               // Clear the display
+	    lcd_send_cmd(&lcd, 0xC0);               // Move the cursor to second line
+	    lcd_puts(&lcd, (char *)"You Pressed Key 2");
+	    while (HAL_GPIO_ReadPin(GPIOA, C2_Pin));
+	}
+
+	if(HAL_GPIO_ReadPin(GPIOA, C3_Pin) == GPIO_PIN_SET)
+	{
+	    /* 3 */
+	    lcd_send_cmd(&lcd, 0x01);               // Clear the display
+	    lcd_send_cmd(&lcd, 0xC0);               // Move the cursor to second line
+	    lcd_puts(&lcd, (char *)"You Pressed Key 3");
+	    while (HAL_GPIO_ReadPin(GPIOA, C3_Pin));
+	}
+
+	if(HAL_GPIO_ReadPin(GPIOA, C4_Pin) == GPIO_PIN_SET)
+	{
+	    /* A */
+	    lcd_send_cmd(&lcd, 0x01);               // Clear the display
+	    lcd_send_cmd(&lcd, 0xC0);               // Move the cursor to second line
+	    lcd_puts(&lcd, (char *)"You Pressed Key A");
+	    while (HAL_GPIO_ReadPin(GPIOA, C4_Pin));
+	}
+
+	/* Setting Row 2 ad High and others LOW */
+	HAL_GPIO_WritePin(GPIOA, R1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, R2_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOA, R3_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, R4_Pin, GPIO_PIN_RESET);
+
+	if(HAL_GPIO_ReadPin(GPIOA, C1_Pin) == GPIO_PIN_SET)
+	{
+	    /* 4 */
+	    lcd_send_cmd(&lcd, 0x01);               // Clear the display
+	    lcd_send_cmd(&lcd, 0xC0);               // Move the cursor to second line
+	    lcd_puts(&lcd, (char *)"You Pressed Key 4");
+	    while (HAL_GPIO_ReadPin(GPIOA, C1_Pin));
+	}
+
+	if(HAL_GPIO_ReadPin(GPIOA, C2_Pin) == GPIO_PIN_SET)
+	{
+	    /* 5 */
+	    lcd_send_cmd(&lcd, 0x01);               // Clear the display
+	    lcd_send_cmd(&lcd, 0xC0);               // Move the cursor to second line
+	    lcd_puts(&lcd, (char *)"You Pressed Key 5");
+	    while (HAL_GPIO_ReadPin(GPIOA, C2_Pin));
+	}
+
+	if(HAL_GPIO_ReadPin(GPIOA, C3_Pin) == GPIO_PIN_SET)
+	{
+	    /* 6 */
+	    lcd_send_cmd(&lcd, 0x01);               // Clear the display
+	    lcd_send_cmd(&lcd, 0xC0);               // Move the cursor to second line
+	    lcd_puts(&lcd, (char *)"You Pressed Key 6");
+	    while (HAL_GPIO_ReadPin(GPIOA, C3_Pin));
+	}
+
+	if(HAL_GPIO_ReadPin(GPIOA, C4_Pin) == GPIO_PIN_SET)
+	{
+	    /* B */
+	    lcd_send_cmd(&lcd, 0x01);               // Clear the display
+	    lcd_send_cmd(&lcd, 0xC0);               // Move the cursor to second line
+	    lcd_puts(&lcd, (char *)"You Pressed Key B");
+	    while (HAL_GPIO_ReadPin(GPIOA, C4_Pin));
+	}
+
+	/* Setting Row 3 ad High and others LOW */
+	HAL_GPIO_WritePin(GPIOA, R1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, R2_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, R3_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOA, R4_Pin, GPIO_PIN_RESET);
+
+	if(HAL_GPIO_ReadPin(GPIOA, C1_Pin) == GPIO_PIN_SET)
+	{
+	    /* 7 */
+	    lcd_send_cmd(&lcd, 0x01);               // Clear the display
+	    lcd_send_cmd(&lcd, 0xC0);               // Move the cursor to second line
+	    lcd_puts(&lcd, (char *)"You Pressed Key 7");
+	    while (HAL_GPIO_ReadPin(GPIOA, C1_Pin));
+	}
+
+	if(HAL_GPIO_ReadPin(GPIOA, C2_Pin) == GPIO_PIN_SET)
+	{
+	    /* 8 */
+	    lcd_send_cmd(&lcd, 0x01);               // Clear the display
+	    lcd_send_cmd(&lcd, 0xC0);               // Move the cursor to second line
+	    lcd_puts(&lcd, (char *)"You Pressed Key 8");
+	    while (HAL_GPIO_ReadPin(GPIOA, C2_Pin));
+	}
+
+	if(HAL_GPIO_ReadPin(GPIOA, C3_Pin) == GPIO_PIN_SET)
+	{
+	    /* 9 */
+	    lcd_send_cmd(&lcd, 0x01);               // Clear the display
+	    lcd_send_cmd(&lcd, 0xC0);               // Move the cursor to second line
+	    lcd_puts(&lcd, (char *)"You Pressed Key 9");
+	    while (HAL_GPIO_ReadPin(GPIOA, C3_Pin));
+	}
+
+	if(HAL_GPIO_ReadPin(GPIOA, C4_Pin) == GPIO_PIN_SET)
+	{
+	    /* # */
+	    lcd_send_cmd(&lcd, 0x01);               // Clear the display
+	    lcd_send_cmd(&lcd, 0xC0);               // Move the cursor to second line
+	    lcd_puts(&lcd, (char *)"You Pressed Key #");
+	    while (HAL_GPIO_ReadPin(GPIOA, C4_Pin));
+	}
+
+	/* Setting Row 4 ad High and others LOW */
+	HAL_GPIO_WritePin(GPIOA, R1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, R2_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, R3_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, R4_Pin, GPIO_PIN_SET);
+
+	if(HAL_GPIO_ReadPin(GPIOA, C1_Pin) == GPIO_PIN_SET)
+	{
+	    /* * */
+	    lcd_send_cmd(&lcd, 0x01);               // Clear the display
+	    lcd_send_cmd(&lcd, 0xC0);               // Move the cursor to second line
+	    lcd_puts(&lcd, (char *)"You Pressed Key *");
+	    while (HAL_GPIO_ReadPin(GPIOA, C1_Pin));
+	}
+
+	if(HAL_GPIO_ReadPin(GPIOA, C2_Pin) == GPIO_PIN_SET)
+	{
+	    /* 0 */
+	    lcd_send_cmd(&lcd, 0x01);               // Clear the display
+	    lcd_send_cmd(&lcd, 0xC0);               // Move the cursor to second line
+	    lcd_puts(&lcd, (char *)"You Pressed Key 0");
+	    while (HAL_GPIO_ReadPin(GPIOA, C2_Pin));
+	}
+
+	if(HAL_GPIO_ReadPin(GPIOA, C3_Pin) == GPIO_PIN_SET)
+	{
+	    /* # */
+	    lcd_send_cmd(&lcd, 0x01);               // Clear the display
+	    lcd_send_cmd(&lcd, 0xC0);               // Move the cursor to second line
+	    lcd_puts(&lcd, (char *)"You Pressed Key #");
+	    while (HAL_GPIO_ReadPin(GPIOA, C3_Pin));
+	}
+
+	if(HAL_GPIO_ReadPin(GPIOA, C4_Pin) == GPIO_PIN_SET)
+	{
+	    /* D */
+	    lcd_send_cmd(&lcd, 0x01);               // Clear the display
+	    lcd_send_cmd(&lcd, 0xC0);               // Move the cursor to second line
+	    lcd_puts(&lcd, (char *)"You Pressed Key D");
+	    while (HAL_GPIO_ReadPin(GPIOA, C4_Pin));
+	}
+
+}
+
+void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+static void MX_I2C1_Init(void)
+{
+  __HAL_RCC_I2C1_CLK_ENABLE();
+  hi2c1.Instance = I2C1;
+  hi2c1.Init.ClockSpeed = 100000;
+  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c1.Init.OwnAddress2 = 0;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+static void MX_TIM1_Init(void)
+{
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
+
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 15;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 9999;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_OC_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_OC_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+  sBreakDeadTimeConfig.DeadTime = 0;
+  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+  if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  HAL_TIM_MspPostInit(&htim1);
+
+}
+
+
+static void MX_GPIO_Init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+
+//
+//  /*Configure GPIO pin KeyPad Output Level */
+//  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, GPIO_PIN_RESET);
+//
+//  /*Configure GPIO pin Buzzer Output Level */
+//  //HAL_GPIO_WritePin(GPIOB, GPIO_PIN_10, GPIO_PIN_RESET);
+//
+//  /*Configure GPIO pins : PA0 PA1 PA2 PA3 KeyPad Output*/
+//  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3;
+//  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+//  GPIO_InitStruct.Pull = GPIO_NOPULL;
+//  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+//  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+//
+//  /*Configure GPIO pins : PA4 PA5 PA6 PA7 KeyPad Input */
+//  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
+//  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+//  GPIO_InitStruct.Pull = GPIO_NOPULL;
+//  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+//  /*Configure GPIO pins : PA0 PA1 PA2 PA3 */
+//  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3;
+//  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+//  GPIO_InitStruct.Pull = GPIO_NOPULL;
+//  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+//  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+//
+//  /*Configure GPIO pins : PA4 PA5 PA6 PA7 */
+//  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
+//  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+//  GPIO_InitStruct.Pull = GPIO_NOPULL;
+//  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    /*Configure GPIO pins : PA0 PA1 PA2 PA3 */
+    GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    /*Configure GPIO pins : PA4 PA5 PA6 PA7 */
+    GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  // Configure GPIO : PA8 Servo-motor
+  GPIO_InitStruct.Pin = GPIO_PIN_9;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;      // Alternate Function Push-Pull
+  GPIO_InitStruct.Pull = GPIO_NOPULL;           // No pull-up or pull-down
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH; // High Speed
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB0 Buzzer */
+  GPIO_InitStruct.Pin = GPIO_PIN_11;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB6 PB7 Display */
+  GPIO_InitStruct.Pin = GPIO_PIN_6 | GPIO_PIN_7;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PC13 LED */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;      // On-board LED is connected to PC13
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;  // Push-pull mode for output
+  GPIO_InitStruct.Pull = GPIO_NOPULL;         // No pull-up or pull-down resistors
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW; // Low speed for general use
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+//  /* EXTI interrupt init*/
+//  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+//  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+
+}
+
+//void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+//{
+//  currentMillis = HAL_GetTick();
+//  if (currentMillis - previousMillis > 10) {
+//
+//    /*Configure GPIO pins : PA4 PA5 PA6 PA7 KeyPad Input */
+//    GPIO_InitStructPrivate.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
+//    GPIO_InitStructPrivate.Mode = GPIO_MODE_INPUT;
+//    GPIO_InitStructPrivate.Pull = GPIO_NOPULL;
+//    GPIO_InitStructPrivate.Speed = GPIO_SPEED_FREQ_LOW;
+//    HAL_GPIO_Init(GPIOA, &GPIO_InitStructPrivate);
+//
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, 1);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 0);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, 0);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, 0);
+//    if(GPIO_Pin == GPIO_PIN_4 && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4))
+//    {
+//      keyPressed = 68; //ASCII value of D
+//    }
+//    else if(GPIO_Pin == GPIO_PIN_5 && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5))
+//    {
+//      keyPressed = 67; //ASCII value of C
+//    }
+//    else if(GPIO_Pin == GPIO_PIN_6 && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6))
+//    {
+//      keyPressed = 66; //ASCII value of B
+//    }
+//    else if(GPIO_Pin == GPIO_PIN_7 && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7))
+//    {
+//      keyPressed = 65; //ASCII value of A
+//    }
+//
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, 0);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, 0);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, 0);
+//    if(GPIO_Pin == GPIO_PIN_4 && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4))
+//    {
+//      keyPressed = 35; //ASCII value of #
+//    }
+//    else if(GPIO_Pin == GPIO_PIN_5 && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5))
+//    {
+//      keyPressed = 57; //ASCII value of 9
+//    }
+//    else if(GPIO_Pin == GPIO_PIN_6 && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6))
+//    {
+//      keyPressed = 54; //ASCII value of 6
+//    }
+//    else if(GPIO_Pin == GPIO_PIN_7 && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7))
+//    {
+//      keyPressed = 51; //ASCII value of 3
+//    }
+//
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, 0);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 0);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, 1);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, 0);
+//    if(GPIO_Pin == GPIO_PIN_4 && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4))
+//    {
+//      keyPressed = 48; //ASCII value of 0
+//    }
+//    else if(GPIO_Pin == GPIO_PIN_5 && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5))
+//    {
+//      keyPressed = 56; //ASCII value of 8
+//    }
+//    else if(GPIO_Pin == GPIO_PIN_6 && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6))
+//    {
+//      keyPressed = 53; //ASCII value of 5
+//    }
+//    else if(GPIO_Pin == GPIO_PIN_7 && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7))
+//    {
+//      keyPressed = 50; //ASCII value of 2
+//    }
+//
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, 0);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 0);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, 0);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, 1);
+//    if(GPIO_Pin == GPIO_PIN_4 && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4))
+//    {
+//      keyPressed = 42; //ASCII value of *
+//    }
+//    else if(GPIO_Pin == GPIO_PIN_5 && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5))
+//    {
+//      keyPressed = 55; //ASCII value of 7
+//    }
+//    else if(GPIO_Pin == GPIO_PIN_6 && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6))
+//    {
+//      keyPressed = 52; //ASCII value of 4
+//    }
+//    else if(GPIO_Pin == GPIO_PIN_7 && HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7))
+//    {
+//      keyPressed = 49; //ASCII value of 1
+//    }
+//
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, 1);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, 1);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, 1);
+//    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, 1);
+//    /*Configure GPIO pins : PB6 PB7 PB8 PB9 back to EXTI*/
+//    GPIO_InitStructPrivate.Mode = GPIO_MODE_IT_RISING;
+//    GPIO_InitStructPrivate.Pull = GPIO_PULLDOWN;
+//    HAL_GPIO_Init(GPIOA, &GPIO_InitStructPrivate);
+//    previousMillis = currentMillis;
+//  }
+//}
+/* USER CODE END 4 */
+
+void Error_Handler(void)
+{
+  __disable_irq();
+  while (1)
+  {
+	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);  // Toggle LED to indicate failure
+	  HAL_Delay(500);
+  }
+}
+
+#ifdef  USE_FULL_ASSERT
+
+void assert_failed(uint8_t *file, uint32_t line)
+{
+
+}
+#endif /* USE_FULL_ASSERT */

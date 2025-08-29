@@ -1,0 +1,86 @@
+2025-04-28 04:37:23,093 [INFO] WebApp:194 - Connection lost
+2025-04-28 04:37:24,241 [INFO] WebApp:191 - Connection restablished
+2025-04-28 04:40:02,150 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:02,151 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:02,151 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:02,152 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:02,173 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:02,173 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:02,198 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:02,198 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:16,826 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:16,827 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:16,827 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:16,827 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:16,847 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:16,848 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:16,866 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:16,866 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:30,480 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:30,480 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:30,480 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:30,480 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:30,499 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:30,499 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:30,516 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:30,517 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:36,445 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:36,446 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:36,446 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:36,446 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:36,468 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:36,468 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:36,486 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:36,486 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:42,108 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:42,109 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:42,110 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:42,110 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:42,125 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:42,125 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:42,144 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:40:42,144 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:41:51,847 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 827371024 Bytes (1073741824)
+2025-04-28 04:43:19,316 [INFO] Gpio:277 - dependency for GPIO [I2C1, SYS, TIM1]
+2025-04-28 04:43:21,127 [INFO] Gpio:277 - dependency for GPIO [I2C1, SYS, TIM1]
+2025-04-28 04:43:31,316 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 857539000 Bytes (1073741824)
+2025-04-28 04:43:33,719 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 563013744 Bytes (1073741824)
+2025-04-28 04:43:54,734 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 633790576 Bytes (1073741824)
+2025-04-28 04:43:55,353 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: NVIC
+2025-04-28 04:43:55,354 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8F1
+2025-04-28 04:43:55,354 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: SYS
+2025-04-28 04:43:55,354 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: GPIO
+2025-04-28 04:43:55,354 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: RCC
+2025-04-28 04:43:55,354 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: I2C
+2025-04-28 04:43:55,356 [INFO] CodeGenerator:882 - code generatio: config db path: D:\SW\stm32\STM32CubeIDE_1.18.0\STM32CubeIDE\plugins\com.st.stm32cube.common.mx_6.14.0.202502271554\\db\
+2025-04-28 04:43:55,361 [WARN] IP:2250 - I2C_Coeff_DF not found: check if there is a RefParameter without a condition.
+2025-04-28 04:43:55,361 [WARN] IP:2250 - Analog_Filter not found: check if there is a RefParameter without a condition.
+2025-04-28 04:43:55,526 [INFO] CodeEngine:263 - oldGeneratedFile, D:\PJ\UNIPRO\CSE331\ide\pass_unlock\MXTmpFiles\license.tmp_save
+2025-04-28 04:43:55,923 [INFO] CodeEngine:287 - Generated code: D:\PJ\UNIPRO\CSE331\ide\pass_unlock\MXTmpFiles\license.tmp
+2025-04-28 04:43:56,078 [INFO] CodeEngine:263 - oldGeneratedFile, D:\PJ\UNIPRO\CSE331\ide\pass_unlock\MXTmpFiles\gpio.tmp_save
+2025-04-28 04:43:56,261 [INFO] CodeEngine:287 - Generated code: D:\PJ\UNIPRO\CSE331\ide\pass_unlock\MXTmpFiles\gpio.tmp
+2025-04-28 04:43:56,487 [INFO] CodeEngine:263 - oldGeneratedFile, D:\PJ\UNIPRO\CSE331\ide\pass_unlock\Core\Src\stm32f1xx_it.c_save
+2025-04-28 04:43:56,655 [INFO] CodeEngine:287 - Generated code: D:\PJ\UNIPRO\CSE331\ide\pass_unlock\Core\Src\stm32f1xx_it.c
+2025-04-28 04:43:56,682 [INFO] CodeEngine:263 - oldGeneratedFile, D:\PJ\UNIPRO\CSE331\ide\pass_unlock\Core\Inc\stm32f1xx_it.h_save
+2025-04-28 04:43:56,784 [INFO] CodeEngine:287 - Generated code: D:\PJ\UNIPRO\CSE331\ide\pass_unlock\Core\Inc\stm32f1xx_it.h
+2025-04-28 04:43:56,824 [INFO] CodeEngine:263 - oldGeneratedFile, D:\PJ\UNIPRO\CSE331\ide\pass_unlock\Core\Src\stm32f1xx_hal_msp.c_save
+2025-04-28 04:43:56,951 [INFO] CodeEngine:287 - Generated code: D:\PJ\UNIPRO\CSE331\ide\pass_unlock\Core\Src\stm32f1xx_hal_msp.c
+2025-04-28 04:43:56,971 [INFO] CodeEngine:263 - oldGeneratedFile, D:\PJ\UNIPRO\CSE331\ide\pass_unlock\MXTmpFiles\system.tmp_save
+2025-04-28 04:43:57,037 [INFO] CodeEngine:287 - Generated code: D:\PJ\UNIPRO\CSE331\ide\pass_unlock\MXTmpFiles\system.tmp
+2025-04-28 04:43:57,070 [INFO] CodeEngine:319 - oldGeneratedFile, D:\PJ\UNIPRO\CSE331\ide\pass_unlock\Core\Inc\stm32f1xx_hal_conf.h_save
+2025-04-28 04:43:57,161 [INFO] CodeEngine:343 - Generated code: D:\PJ\UNIPRO\CSE331\ide\pass_unlock\Core\Inc\stm32f1xx_hal_conf.h
+2025-04-28 04:43:57,209 [INFO] ApiDbMcu:508 - Load IP Config File for I2C1
+2025-04-28 04:43:57,223 [INFO] ApiDbMcu:508 - Load IP Config File for TIM1
+2025-04-28 04:43:57,228 [INFO] ApiDbMcu:508 - Load IP Config File for RCC
+2025-04-28 04:43:57,231 [WARN] IPConfigManager:3747 - IP not found : TIM
+2025-04-28 04:43:57,231 [WARN] CodeGenerator:4198 - IP not found : null
+2025-04-28 04:43:57,264 [INFO] CodeEngine:263 - oldGeneratedFile, D:\PJ\UNIPRO\CSE331\ide\pass_unlock\Core\Inc\main.h_save
+2025-04-28 04:43:57,364 [INFO] CodeEngine:287 - Generated code: D:\PJ\UNIPRO\CSE331\ide\pass_unlock\Core\Inc\main.h
+2025-04-28 04:43:57,389 [INFO] CodeEngine:263 - oldGeneratedFile, D:\PJ\UNIPRO\CSE331\ide\pass_unlock\Core\Src\main.c_save
+2025-04-28 04:43:57,577 [INFO] CodeEngine:287 - Generated code: D:\PJ\UNIPRO\CSE331\ide\pass_unlock\Core\Src\main.c
+2025-04-28 04:43:57,984 [INFO] ProjectBuilder:3324 - Time for Copy HAL[1] : 152mS.
+2025-04-28 04:43:57,991 [INFO] ProjectBuilder:4912 - Project Generator version: 4.6.0-B36
+2025-04-28 04:43:58,070 [INFO] ConfigFileManager:1590 - The Die is : DIE410
+2025-04-28 04:43:58,087 [INFO] ApiDbMcu:508 - Load IP Config File for FATFS
+2025-04-28 04:43:58,102 [INFO] ApiDbMcu:508 - Load IP Config File for FREERTOS
+2025-04-28 04:43:58,117 [INFO] ApiDbMcu:508 - Load IP Config File for USB_DEVICE
